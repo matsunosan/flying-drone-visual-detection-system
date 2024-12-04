@@ -4,101 +4,108 @@
 ## **Project Overview**  
 The **Flying Drone Visual Detection System** is a computer vision-based system that enables UAVs to detect, classify, and differentiate between various objects in real-time. The system is built using deep learning models, integrated with ROS (Robot Operating System), and tested in both simulation and real-world environments.
 
-### **Key Features**  
-- **Real-time Object Detection**: Utilizes the YOLOv5 architecture for fast and accurate object detection.  
-- **Customizable Classes**: Detects a variety of objects such as vehicles, tanks, buildings, and personnel.  
-- **Simulation Integration**: Tested in the Gazebo simulation environment for robust performance.  
-- **ROS-Based System**: Seamlessly integrates with UAVs using ROS for communication and control.
+## Prerequisites
+- Ubuntu
+- ROS
+- Gazebo
+- Ardupilot
+- Ardupilot_gazebo plugin
+- Docker
+- Mavproxy
 
----
+## Installation
+### Ubuntu
+Ubuntu 20.04 inside a Virtual Machine (VM) used in this tutorial.
 
-## **Project Structure**  
-The repository is structured as follows:
-
-```plaintext
-├── data/                   # Dataset and annotations
-├── docs/                   # Documentation and reports
-├── models/                 # Pretrained and fine-tuned models
-├── scripts/                # Python scripts for training, detection, and integration
-├── simulation/             # Gazebo simulation files
-├── src/                    # ROS nodes for object detection
-├── results/                # Test results and evaluation metrics
-└── README.md               # Project overview and setup instructions
+### ROS
+The ROS noetic is used in this tutorial. You can use steps below to install it:
+```
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'
+sudo apt install curl
+curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
+sudo apt update
+sudo apt install ros-noetic-desktop-full
+echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+sudo apt install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
+sudo apt install python3-rosdep
+sudo rosdep init
+rosdep update
 ```
 
----
-
-## **Installation and Setup**  
-
-Follow the instructions below to set up the system on your local machine.
-
-### **1. Clone the Repository**  
-```bash
-git clone https://github.com/matsunosan/flying-drone-visual-detection-system.git
-cd flying-drone-visual-detection-system
+### Gazebo
+The Gazebo version 11 is used in this tutorial. ROS noetic has gazebo11 but if there is problem with it, you can use steps below to install it:
+```
+sudo sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable `lsb_release -cs` main" > /etc/apt/sources.list.d/gazebo-stable.list'
+wget http://packages.osrfoundation.org/gazebo.key -O - | sudo apt-key add –
+sudo apt-get update
+sudo apt-get install gazebo11 libgazebo11-dev
+```
+If you are using Ubuntu in a VM and gazebo has graphical problems, put the line below inside your bash (bashrc, zshrc, ...):
+```
+export SVGA_VGPU10=0
 ```
 
-### **2. Install Dependencies**  
-This project requires Python 3.8 or higher, along with the following dependencies:
-
-```bash
-pip install -r requirements.txt
+### Ardupilot
+The latest version (4.3.6 at the time of writing) used in this tutorial. You can use steps below to install it:
+```
+git clone https://github.com/ArduPilot/ardupilot.git
+cd ardupilot
+git submodule update --init –recursive
+alias waf="$PWD/modules/waf/waf-light"
+waf configure --board=sitl
+waf all
+./Tools/environment_install/install-prereqs-ubuntu.sh -y
 ```
 
-Key libraries:  
-- `torch`  
-- `opencv-python`  
-- `numpy`  
-- `matplotlib`  
-- `rospy` (for ROS integration)
-
-### **3. Set Up ROS**  
-Ensure ROS Noetic is installed and properly configured.  
-```bash
-sudo apt-get install ros-noetic-desktop-full
+### Ardupilot_gazebo
+```
+git clone https://github.com/SwiftGust/ardupilot_gazebo
+cd ardupilot_gazebo
+mkdir build
+cd build
+cmake ..
+make -j2
+sudo make install
+```
+After installation of this plugin, you need to add lines below inside your bash (bashrc, zshrc, ...):
+```
+source /usr/share/gazebo/setup.sh
+export GAZEBO_MODEL_PATH=~/ardupilot_gazebo/models:${GAZEBO_MODEL_PATH}
+export GAZEBO_MODEL_PATH=~/ardupilot_gazebo/models_gazebo:${GAZEBO_MODEL_PATH}
+export GAZEBO_RESOURCE_PATH=~/ardupilot_gazebo/worlds:${GAZEBO_RESOURCE_PATH}
+export GAZEBO_PLUGIN_PATH=~/ardupilot_gazebo/build:${GAZEBO_PLUGIN_PATH}
 ```
 
-### **4. Running the System**  
-
-#### **4.1 Running in Simulation (Gazebo)**  
-Launch the simulation environment:  
-```bash
-roslaunch simulation drone_simulation.launch
+### Docker
+The latest version (23.0.6 at the time of writing) used in this tutorial. You can use steps below to install it:
+```
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
-Run the object detection node:  
-```bash
-rosrun src object_detection_node.py
+## Run single UAV
+- Open a terminal and run the commands below:
 ```
-
-#### **4.2 Running on Physical UAV**  
-1. Deploy the model to the UAV’s onboard computer.  
-2. Run the object detection script.  
-3. Monitor detected objects via the ROS topic `/detected_objects`.
-
----
-
-## **Testing and Evaluation**  
-
-### **Simulation Testing**  
-Test the system in the Gazebo simulation environment with different objects and scenarios.  
-
-### **Real-World Testing**  
-Deploy the system on a UAV and conduct field tests to evaluate detection accuracy and system performance.
-
----
-
-## **Future Work**  
-- **Expand Object Classes**: Incorporate more object categories and improve detection accuracy.  
-- **Optimize Inference Speed**: Enhance real-time performance on low-power devices.  
-- **Integrate Thermal Imaging**: Add thermal cameras for night-time object detection.
-
----
-
-## **License**  
-All rights reserved. This project is proprietary and may not be used, modified, or distributed without permission from the owner.  
-
----
-
-## **Contact**  
-For any inquiries or collaboration opportunities, please reach out via [GitHub Issues](https://github.com/matsunosan/flying-drone-visual-detection-system/issues).
+cd ~/ardupilot/Tools/autotest
+./sim_vehicle.py -v ArduCopter -f gazebo-iris --console -I0
+```
+- Open a new terminal and run:
+```
+gazebo --verbose ~/ardupilot_gazebo/worlds/iris_ardupilot.world
+```
+- After seeing "APM: EKF2 IMU0 is using GPS" message in console, you can use the commands below in the first terminal for takeoff test:
+```
+mode guided
+arm throttle
+takeoff 5
+```
