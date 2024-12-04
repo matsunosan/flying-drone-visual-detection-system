@@ -2,7 +2,7 @@
 *A real-time object detection and classification system for UAVs (Unmanned Aerial Vehicles), designed for military and surveillance applications.*
 
 ## **Project Overview**  
-The **Flying Drone Visual Detection System** is a computer vision-based system that enables UAVs to detect, classify, and differentiate between various objects in real-time. The system is built using deep learning models, integrated with ROS (Robot Operating System), and tested in both simulation and real-world environments.
+The **Flying Drone Visual Detection System** is a computer vision-based system that enables UAVs to detect, classify, and differentiate between various objects in real-time. The system is built using deep learning models, integrated with ROS (Robot Operating System), and tested in simulation environment.
 
 ## Prerequisites
 - Ubuntu
