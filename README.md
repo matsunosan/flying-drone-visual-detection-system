@@ -101,7 +101,8 @@ cd ~/ardupilot/Tools/autotest
 ```
 - Open a new terminal and run:
 ```
-gazebo --verbose ~/ardupilot_gazebo/worlds/iris_ardupilot.world
+gazebo --verbose ~/ardupilot/ardupilot_gazebo/worlds/iris_ardupilot.world
+
 ```
 - After seeing "APM: EKF2 IMU0 is using GPS" message in console, you can use the commands below in the first terminal for takeoff test:
 ```
